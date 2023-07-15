@@ -1,0 +1,8 @@
+FROM LIB:catch.o "Help.o"+"Language.o"+"LoadSave.o"+"Main1.o"+"Main2.o"+"AGASupp.o"+"PPrefs.o"+"Error.o"+"Close.o"+"BreakFile.o"+"DiskTask.o"+"Open.o"+"GList.o"+"Plot.o"+"IFF_IO.o"+"Palette.o"+"Main3.o"+"Backup.o"+"Def_Prefs.o"+"Version.o"+"WBStartup.o"+"Geometry.o"+"IFF_IOa.o"+"IFF_IOa2.o"
+TO "3dPlot"
+LIB LIB:user.lib ImBorderBM.o Image.o LIB:userm881.lib IFF_IOa2.o Languages/English.o IFF_IOa.o LIB:scm881.lib
+    LIB:sc.lib LIB:amiga.lib
+SMALLCODE
+SMALLDATA
+DEFINE @__chkabort=@__dummy
+

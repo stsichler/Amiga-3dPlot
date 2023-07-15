@@ -1,0 +1,8 @@
+# Programm zur Neuproduktion der Sprachfiles
+
+MakeLanguage: English.o Deutsch.o
+
+.c.o:
+	sc:c/sc $>
+	makelanguage
+

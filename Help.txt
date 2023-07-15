@@ -1,0 +1,49 @@
+.10. Funktionseingabegadget -----------------------------------------------
+\
+The Function Gadget - enter the function you want to draw.
+===================
+
+Accepted operators of V2.9 and higher are (in order of priority):
+
+        fnct()       (i.e. function with ()-enclosed arg.)
+        !  ²  ³  %   (% means percent: 32.5% = .325)
+        ^
+        *  :  /      ( : and / is the same)
+        fnct         (i.e. function with a simple arg.)
+        +  -  ()
+
+The function term is case-insensitive, x and y are variables, pi,¶ and e are constants.
+Scientific syntax is allowed, e.g. 4.5E2 (NOT 4.5e2!!) means 450. Multiplication signs can be left out.
+\
+Currently implemented functions are:
+  sin, cos, tan, cot, asin, acos, atan, sinh, cosh, tanh, ln, exp, log, abs, sqrt, sgn, sin², cos², tan².
+.end
+
+.12.13. Auflösungsgadgets -------------------------------------------------
+\
+The Resolution Gadgets - the drawing resolution.
+======================
+
+Here you can enter the resolution in x and y you want the function to be rendered with.
+i.g. If you enter 3 × 3, the function will be drawn as 9 quadrangles.
+
+Values from 1 to 5000 are allowed. (V3.0+)
+.end
+
+.14.15.16.17.18.19. Bereichsgadgets ---------------------------------------
+\
+The Range Gadgets - enter the range you want to draw.
+=================
+
+Here you define the range within the function is calculated and drawn.
+
+Z-values that are out of range are either not drawn or limited, depending on the "Limited z-value" option.
+.end
+
+.33.34.35. Lichtvektor ----------------------------------------------------
+\
+The Lighting Gadgets - enter the position of the lighting
+====================
+
+These are the co-ordinates of the lighting. They only take effect if the "Body: Lighted" mode is chosen.
+.end

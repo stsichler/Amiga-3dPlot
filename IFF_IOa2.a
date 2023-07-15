@@ -1,0 +1,256 @@
+;	opt l+
+;--------------------------------------------------------------------------
+; Plot V3.0 SSi -----------------------------------------------------------
+; Assemblerteil(2) von DiskIO.c -------------------------------------------
+;--------------------------------------------------------------------------
+;	opt	o+
+
+;	incdir	"data:Ass/include/"
+	include	"graphics/gfx.i"
+
+;	output .o
+
+;-----------------------------------------------------------------------------
+;int ReadIFFBody(D0 struct IFFHandle *iff, A0 struct BitMap *cbm, A1 struct Rastport *rp);
+;-----------------------------------------------------------------------------
+
+;Database
+
+	OFFSET 0
+clipbm	ds.l	1	;^ Clipboard-Bitmap
+filep		ds.l	1	;Filepointer
+rastp		ds.l	1	;^ Ziel-Rastport
+maxlines	ds.w	1	;max.Zahl von Linien
+
+tlb		ds.w	1	;Top Line of Buffer
+lib		ds.w	1	;Lines In Buffer
+
+loadrows	ds.w	1	;max.Zahl der Linien im Buffer
+
+bip		ds.w	1	;Bytes In Buffer
+bcnt		ds.w	1	;BufferCounter
+buf		ds.b	64	;Buffer
+DATA_SIZEOF
+	ds.w	0
+
+
+	SECTION	IFFDecompression,CODE
+
+	XDEF	_ReadIFFBody
+
+	XREF	_IFFParseBase
+	XREF	_GfxBase
+	
+	XREF	_DrawX
+	XREF	_Drawx
+	XREF	_DrawY
+	XREF	_Drawy
+
+;Registerequivalenzen -------------------------------------------------------
+
+bytno EQUR	d2		;Nummer des gelesenen Bytes
+line	EQUR	d3		;gelesene Zeile
+plane	EQUR	d4		;   " Bitplane
+bpr	EQUR	d5		;BytesPerRow
+
+;			d6		;als Zw.speicher frei
+			
+error	EQUR	d7
+
+lineadr EQUR	a2		;Adresse der Zeile line in Plane plane
+cbm	EQUR	a3		;^Clipboard Bitmap
+bp	EQUR	a5		;Bufferpointer
+
+;Konstanten -----------------------------------------------------------------
+
+BUFSIZE	EQU	64
+
+;----------------------------------------------------------------------------
+_ReadIFFBody:	;Labels A
+	movem.l	d2-d7/a2-a6,-(sp)
+	
+	lea.l	DATABase,a4		;Übergabepar. retten
+	move.l	d0,filep(a4)
+	move.l	a0,clipbm(a4)
+	move.l	a0,cbm
+	move.l	a1,rastp(a4)
+	
+	clr.l	error			;Fehlervektor löschen
+	
+	move.w	_DrawY,d0		;Daten initialisieren
+	sub.w	_Drawy,d0
+	addq.w	#1,d0
+	move.w	d0,maxlines(a4)
+	
+	move.w	bm_Rows(cbm),loadrows(a4)
+	move.w	bm_BytesPerRow(cbm),bpr
+	
+	move.l	_IFFParseBase,a6
+
+	clr.w	bip(a4)
+	clr.w	bcnt(a4)
+	lea.l	buf(a4),bp
+	
+Ainit1
+	clr.l	line
+As1
+	cmp.w	maxlines(a4),line
+	bge		Aend1
+	tst.l	error
+	bne		Aend1
+	
+Ainit2
+	move.w	line,tlb(a4)
+	clr.w	lib(a4)
+As2
+	cmp.w	maxlines(a4),line
+	bge		Aend2
+	tst.l	error
+	bne		Aend1
+	move.w	lib(a4),d0
+	cmp.w	loadrows(a4),d0
+	bge		Aend2
+	
+Ainit3
+	clr.l	plane
+As3
+	cmp.b	bm_Depth(cbm),plane
+	bge		Aend3
+	tst.l	error
+	bne		Aend3
+
+	move.w	plane,d0
+	asl.w	#2,d0
+	move.l	bm_Planes(cbm,d0),lineadr
+	move.w	lib(a4),d0
+	mulu	bpr,d0
+	adda.l	d0,lineadr
+	
+Ainit4
+	clr.l	bytno
+As4
+	cmp.w	bpr,bytno
+	bge		Aend4
+	tst.l	error
+	bne		Aend4
+
+	;innere Schleife - - - - - - - - - - - - - 
+	
+	bsr		GetByte
+	
+	cmp.b	#-128,d0
+	beq		Arep4
+	
+Aif1
+	tst.b	d0
+	bmi.s	Aif1n
+Aif1p
+	move.w	d0,d6	;d6+1 untersch. Byte einlesen
+	add.w	d6,bytno
+	addq.w	#1,bytno
+		
+Aloop1
+	bsr		GetByte
+	move.b	d0,(lineadr)+
+	dbra.w	d6,Aloop1
+	
+	bra.s	Aif1e
+Aif1n
+	move.w	d0,d6	;-d6+1 gleiche Byte einzulesen
+	neg.b	d6
+	add.w	d6,bytno
+	addq.w	#1,bytno
+	
+	bsr		GetByte
+Aloop2
+	move.b	d0,(lineadr)+
+	dbra.w	d6,Aloop2
+
+Aif1e
+
+	;- - - - - - - - - - - - - - - - - - - - - 
+
+Arep4
+	bra		As4
+Aend4
+Arep3
+	addq.w	#1,plane
+	bra		As3		
+Aend3
+Arep2
+	addq.w	#1,line
+	add.w	#1,lib(a4)
+	bra		As2
+Aend2
+
+	;Puffer ausgeben  - - -
+	
+	tst.w	lib(a4)
+	beq		Aif2e
+	tst.l	error
+	bne		Aif2e
+	
+	movem.l	a0/a1/a6/d0-d6,-(sp)
+	
+	move.l	cbm,a0
+	clr.w	d0
+	clr.w	d1
+	move.l	rastp(a4),a1
+	move.w	_Drawx,d2
+	move.w  _Drawy,d3
+	add.w	tlb(a4),d3
+	move.w	_DrawX,d4
+	sub.w	_Drawx,d4
+	addq.w	#1,d4
+	move.w	lib(a4),d5
+	move.b	#$cc,d6
+	
+	move.l	_GfxBase,a6
+	jsr		-606(a6)	;BltBitMapRastPort(gfx)
+	
+	movem.l	(sp)+,a0/a1/a6/d0-d6
+	
+Aif2e
+	clr.w	lib(a4)
+Arep1
+	bra		As1
+Aend1
+Aexit
+	move.l	error,d0
+	movem.l	(sp)+,d2-d7/a2-a6
+	rts
+
+;Hilfsroutinen --------------------------------------------------------------
+
+GetByte:					;Holt ein Byte nach d0.w ;Labels B
+	move.w	bcnt(a4),d1
+	cmp.w	bip(a4),d1
+	bge		Bload
+	
+	clr.w	d0
+	move.b	0(bp,d1),d0
+	addq.w	#1,bcnt(a4)
+	rts
+
+Bload
+	clr.w	bcnt(a4)	;Buffer voll laden
+	move.l	filep(a4),a0
+	move.l	bp,a1
+	move.l	#BUFSIZE,d0
+	jsr	-60(a6)	;ReadChunkBytes(IFFParse)
+	move.w	d0,bip(a4)
+	tst.l	d0
+	bpl.s	GetByte		;Fehler ?
+	moveq.l	#-1,error
+	clr.w	d0
+	rts
+
+;Daten ----------------------------------------------------------------------
+
+	SECTION	IFFDecompression,BSS
+	
+DATABase:
+	ds.b	DATA_SIZEOF
+	
+	END
+

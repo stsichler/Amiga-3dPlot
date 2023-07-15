@@ -1,0 +1,140 @@
+==============================================================================
+3dPlot V3.00                                                       ® SSi 93/94
+==============================================================================
+Erstellt mit SAS/C 6.3                                 Stefan Sichler, 15-8-94
+------------------------------------------------------------------------------
+
+Was ist 3dPlot ? -------------------------------------------------------------
+
+  3dPlot zeichnet drei-dimensionale mathematische Funktionen. Dabei kann unter
+  zahlreichen Zeichenmodi ausgewählt werden, die Funktion kann gedreht werden,
+  die fertigen Bilder im IFF-Format gespeichert werden.
+
+Hardwareanforderungen --------------------------------------------------------
+
+  Zum Betrieb von 3dPlot V3.0 ist ein PAL Amiga mit OS 2.04 oder höher und
+  einem Mindestspeicher von 1 MByte notwendig.
+  Eine Festplatte wird empfohlen.
+  
+Start von 3dPlot -------------------------------------------------------------
+
+  3dPlot kann von der Workbench oder vom CLI gestartet werden.
+  
+  1. Start von der Workbench
+  
+     Doppelklick auf das 3dPlot Icon.
+     3dPlot verwendet als Parameter die im Feld Tooltypes des Icons angege-
+     benen Werte. (siehe Startparameter)
+  
+  2. Start vom CLI
+  
+     Eingabe von:
+     
+     3dPlot <Startparameter> 
+
+     Werden keine Startparameter angegeben, verwendet das Programm die im 
+     Icon gespeicherten Tooltypes als Parameter, sonst die hier angegebenen.
+
+Startparameter ---------------------------------------------------------------
+
+  DIR=<Pfad>
+  
+    Setzt den Datenpfad, in dem 3dPlot Funktionen, Bilder etc. lädt oder 
+    speichert.
+    Default: -derz. Directory-
+  
+  INTERLACE=<ON/OFF>
+  
+    Schaltet die Interlaceauflösung ein oder aus.
+    Default: OFF
+  
+  HELP=<Dateiname>
+  
+    Legt den Dateinamen der verwendeten 3dPlot-Hilfedatei fest.
+    Default: bei deutscher Sprache "Hilfe.TXT"
+             bei englischer Sprache "Help.TXT"
+
+  LANGUAGE=<Dateiname>
+  
+    Legt den Dateinamen der Sprachdatei fest, die verwendet werden soll.
+    Es sind nur zwei Dateien mitgeliefert: Deutsch.lng und English.lng
+    Default: -keine-, dadurch wird die in 3dPlot eingebaute englische
+             Sprache angewandt.
+
+  BACKUP=<Dateiname>
+  
+    Setzt den Dateinamen einer evtl. Backupdatei fest.(siehe Programmoption 
+    Backupdatei)
+    Default: ".bak" im unter DIR= angegebenen Directory
+
+  SETOPT=<Option(en)>  (ACR, TIME, LOWPRI, APS, AWH, BAK)
+  
+    Aktiviert die angegebenen Programmoptionen. (siehe Programmoptionen)
+    Default: ACR|AWH
+  
+  CLROPT=<Option(en)>  (ACR, TIME, LOWPRI, APS, AWH, BAK)
+  
+    Deaktiviert die angegebenen Programmoptionen. (siehe Programmoptionen)
+    Default: -keine-
+    
+    SETOPT hat vor CLROPT Vorrang.
+    
+------------------------------------------------------------------------------
+Die Benutzeroberfläche von 3dPlot
+------------------------------------------------------------------------------
+
+Nach dem Start läßt sich der Bildschirm in 3 Bereiche teilen (von oben nach
+unten):
+
+  1. Die Titelzeile, in der die Programmversion zu erkennen ist. Mit der
+     rechten Maustaste läßt sich die Menüzeile ein- u. ausblenden,  um den
+     Bildschirm verschieben zu können.
+     Mit dem Schließgadget in der linken oberen Bildschirmecke kann das
+     Programm verlassen werden.
+  
+  2. Den Zeichenbereich (schwarz). Hier wird die Funktion gezeichnet, bei 
+     Bedarf zusätzliche Fenster eingeblendet, und die Funktionsansicht
+     editiert. Im Editiermodus werden in der rechten unteren Ecke des
+     Zeichenbereichs die gerade eingestellten Drehwinkel der Funktion
+     eingeblendet.
+  
+  3. Die Bedienungskonsole (grau). Auf der linken Seite kann hier die
+     Funktion eingegeben werden, der Funktionsbereich und die Zeichenauf-
+     lösung festgelegt werden (siehe auch "Eingabe einer Funktion").
+     In der Mitte befinden sich die Knöpfe zum Starten des Zeichen-
+     vorgangs (siehe "Zeichnen der Funktion") und zum Ein- u. Ausblenden 
+     aller 16 Farben (siehe Programmoption "Autom. Farbreduktion"). Rechts 
+     können die Drehwinkel der Funktion eingestellt werden und ihre Größe 
+     und Position am Bildschirm verändert werden (siehe "Editieren der 
+     Funktion"). 
+     Am rechten unteren Rand der Konsole befindet sich der Knopf "Disk...",
+     um den Diskettenrequester einzublenden, und die Knöpfe "Opt1..." und
+     "Opt2...", um zu den beiden Optionenfenster zu gelangen.
+     Siehe hierzu "Einstellen von Programmoptionen" und "Einstellen von
+     Zeichenoptionen".
+
+------------------------------------------------------------------------------
+Eingabe einer Funktion
+------------------------------------------------------------------------------
+
+Der Funktionsterm, der gezeichnet werden soll, muß auf der Bedienungskonsole
+links oben im Gadget "z(x,y)=" eingegeben werden. Der eingegebene Term
+bestimmt den z-Wert der Funktion in Abhängigkeit von den Variablen x und y.
+Hilfe ist während der Eingabe des Terms durch Betätigung der "Help"-Taste
+zu erreichen.
+ 
+------------------------------------------------------------------------------
+Editieren der Funktion
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Einstellen von Programmoptionen
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Einstellen von Zeichenoptionen
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Zeichnen der Funktion
+------------------------------------------------------------------------------

@@ -1,0 +1,6 @@
+FROM LIB:c.o "Deutsch.o"
+TO "MakeLanguage"
+LIB /Version.o MakeLanguage.o LIB:user.lib LIB:sc.lib LIB:amiga.lib
+SMALLCODE
+SMALLDATA
+

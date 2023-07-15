@@ -1,0 +1,314 @@
+.1. Hauptwindow -----------------------------------------------------------
+
+Dies ist das Hauptwindow!
+.end
+
+.2. Optionswindow(1) ------------------------------------------------------
+
+Dies ist das Optionenwindow 1!
+.end
+
+.3. Optionswindow(2) ------------------------------------------------------
+
+Dies ist das Optionenwindow 2!
+.end
+
+.4. Diskwindow ------------------------------------------------------------
+
+Dies ist das Diskwindow!
+.end
+
+.5. Resolutionwindow ------------------------------------------------------
+
+Dies ist das Auflösungswindow!
+.end
+
+.6. Paletttewindow --------------------------------------------------------
+
+Dies ist das Palettewindow!
+.end
+
+.10. Funktionseingabegadget -----------------------------------------------
+\
+Das Funktionseingabegadget - die Funktion, die Sie zeichnen möchten.
+==========================
+
+Hier geben Sie den Funktionsterm ein, dessen Schaubild Sie zeichnen möchten. Er hat folgende Syntax:
+
+<Term>;<Var1>=<Term1>;<Var2>=<Term2>;...;<Varn=Termn>
+
+wobei <Term> der Hauptterm ist, der irgendwie aus den Variablen x und y einen z-Wert berechnet.
+
+Des weiteren können Sie - jeweils durch Semikola (;) abgetrennt - Variablendefinitionen angeben, die einer best. Variablen für jeden(!) Berechnungsschritt (=jede Berechnung eines Stützpunktes) einen Wert zuordnen.
+Variablennamen können aus Buchstaben und Zahlen bestehen, jedoch müssen sie mit einem Buchstaben beginnen. 
+
+Bei jeder Stützpunktberechnung werden die Variablen VON RECHTS NACH LINKS (!!) berechnet. Daraus ergibt sich:
+
+1. eine Variable darf nur solche Variablen enthalten, die weiter rechts definiert sind.
+2. der Hauptterm ganz links wird zum Schluß ausgewertet und ergibt dann die z Koordinate des Stützpunktes.
+  
+Beispiele für Terme, die Sie hier angeben können:
+
+        sin 4x
+
+        xy
+
+        cos r;r=sqrt(x²+y²)
+
+        sin(Test)+cos(3x);Test=sqrt(x²+y0²);y0=abs y
+
+
+
+
+Es werden folgende Rechenzeichen bzw. Anweisungen erkannt (nach Priorität geordnet):
+
+        fnkt()         (entspr. Funktion mit Klammerargument)
+        !  ²  ³  %  °  (! heißt Fakultät) (%: 32.5%=.325) (°: 180°=¶)
+        ^
+        *  :  /        (wobei sich : und / entspricht)
+        fnkt           (entspr. Funktion mit einfachem Argument)
+        +  -
+        \  ?           (\ heißt boolsche Negation) (zu ? s.u.)
+        <  <=  >  >=   (boolsche Vergleiche)
+        =  \=          (        -"-        )
+        &              (& heißt boolsches Und)
+        |              (| heißt boolsches Oder)
+        ()
+
+Beim Funktionsterm ist Groß/Kleinschreibung egal, x und y sind die Funktionsvariablen, pi,¶ und e sind die jeweiligen Konstanten.
+Wissenschaftliche Schreibweise ist erlaubt: 4.5E2 (NICHT 4.5e2!!) bedeutet 450. Multipikationszeichen können ausgelassen werden.
+
+Derzeit erkannte Funktionen sind:
+
+sin, cos, tan, cot, asin, acos, atan, sinh, cosh, tanh, ln, exp, log, abs, sqrt, sgn, sin², cos², tan², iterate().
+
+
+
+*** ACHTUNG ***  Ein Aufruf einer Funktion außerhalb ihres Definitionsbereiches (z.B. ln(-5)) ergibt einen Funktionswert von 0. Das Zeichnen wird NICHT abgebrochen!
+
+
+
+zu boolschen Operatoren:
+
+    Alle Zahlen ungleich 0 werden als 'wahr' angesehen, die 0 als 'falsch'.
+    Boolsches 'wahr' entspricht dem Zahlenwert 1,
+    Boolsches 'falsch' entspricht einer 0.
+
+    Beispiele:
+
+      5*(x>2)  ergibt 5 bei x=3, und 0 bei x=-7.3.
+
+      7 & x    ergibt 1 bei x ungleich 0, und 0 bei x=0.
+
+      (?x)(.2+x) ergibt (.2+x) für alle x ungleich 0, und 0 für x=0.
+  
+      ?x       ergibt 1 bei x ungleich 0, und 0 bei x=0.
+
+      \(x>4) entspricht x<=4
+
+      \(x=6) entspricht x\=6
+
+      ?(x>4) entspricht x>4
+
+
+
+zur iterate() Funktion:
+
+Mit der iterate() Funktion können iterative Ausdrücke ausgewertet werden. iterate() ist nur mit Klammerargument zulässig und hat folgende Syntax:
+
+iterate(<Term>;<Var.1>=<Term 1>;<Var.2>=<Term 2>; ... ;<Var.n>=<Term n>)
+    
+zu <Term>:
+    
+Das ist der "Zielterm" der Iterationsfunktion. Er wird einmal, nämlich nach dem Abbruch der Iteration ausgewertet, und dessen Ergebnis als Funktionswert der iterate() Funktion zurückgegeben.
+Der Term darf alle lokalen Variablen der Iteration und alle globalen Variablen - also die, die außerhalb der iterate() Funktion definiert sind - beinhalten.
+    
+zu <Term n>:
+    
+Das sind die einzelnen Iterationsterme (sie werden von rechts nach links ausgewertet); jeder von ihnen bestimmt den Wert der lokalen Variable <Var.n> bei jeder Iteration neu.
+Sie dürfen alle lokalen Variablen der Iteration und alle globalen Variablen beinhalten, aber vorsicht:
+Eine Referenz auf eine Variable, die weiter links definiert ist, oder auf sich selbst, ergibt ihren Wert bei der vorherigen Iteration;
+eine Referenz auf eine Variable, die weiter rechts definiert ist, dagegen ihren Wert bei der derzeitigen Iteration!
+
+Jeder Term darf einen Initialisierungsterm der Form [<Term>] besitzen. Er darf alle lokalen Variablen der Iteration beinhalten, die weiter rechts definiert sind, und alle globalen Variablen.
+Dieser Term bestimmt den Wert der damit definierten Variablen vor der ersten Iteration;
+fehlt er, erhält sie den Wert 0.
+
+Eine besondere Bedeutung besitzt die lokale Iterationsvariable "brk": Hat sie den Wert 'wahr' führt dies zum Abburch der Iteration.
+Sie darf in keiner iterate() Funktion fehlen.
+      
+
+******* WICHTIG: ****** Bei einer fehlerhaften Abbruchbedingung kann die iterate() Funktion in eine Endlosschleife verfallen.
+Sie kann dann durch mind. 3 Sekunden langes Niederhalten der Tastenkombination <Ctrl>C abgebrochen werden.
+ 
+
+
+Beispiel zur iterate() Funktion:
+
+   iterate(z/2;z=i(z-1)[za];brk=i>imax;i=i+1[0]); za=4; imax=3
+
+   ergibt den Wert 16.
+   
+   Vorgang:
+   
+   0. i=0  =0;  brk=0     =0;  z=za    =4
+   
+   1. i=i+1=1;  brk=i>imax=0;  z=i(z-1)=3
+   2. i=i+1=2;  brk=i>imax=0;  z=i(z-1)=4
+   3. i=i+1=3;  brk=i>imax=0;  z=i(z-1)=9
+   4. i=i+1=4;  brk=i>imax=1;  z=i(z-1)=32
+   
+   5. Rückgabewert: =z/2= 16
+
+
+*********************************
+Beispielfunktion: "Apfelmännchen"
+*********************************
+
+zu zeichnen in den Bereichen x: [   -2; 0.5]
+                             y: [-1.25;1.25]
+                             z: [-0.52;0.52]
+
+z(x,y)=(iterate(i;xa=xi;ya=yi;xi=xa²-ya²+x;yi=2xaya+y;i=i+1;brk=(xa²+ya²>maxr)|i>=maxi)-25)/50;maxr=1E8;maxi=50
+
+.end
+
+.12.13. Auflösungsgadgets -------------------------------------------------
+\
+Die Auflösungsgadgets - die Zeichenauflösung.
+=====================
+
+Hier können Sie die Anzahl der Stützpunkte in x- und y-Richtung eingeben, die berechnet werden sollen.
+
+Geben Sie z.B. 3 × 3 ein, so wird die Funktion mit 9 Rechtecken gezeichnet.
+
+Es sind Werte im Bereich von 1 bis 5000 erlaubt.
+
+Bei einer Änderung wird automatisch der zugehörige Abstandswert des Zeichenmusters (siehe Optionen(1)) angepaßt.
+.end
+
+.14.15.16.17.18.19. Bereichsgadgets ---------------------------------------
+\
+Die Bereichsgadgets - Eingabe des Funktionsintervalls
+===================
+
+Hier können Sie das Intervall in x-,y- u. z-Richtung bestimmen, in dem die Funktion gezeichnet werden soll.
+
+Z-Werte, die nicht im entspr. Intervall liegen werden entweder nicht gezeichnet, oder auf die Intervallgrenzen beschränkt; 
+das hängt von der Option "z-Wert beschränken" ab.
+.end
+
+.29.30. Muster-Abstands-Gadgets -------------------------------------------
+\
+Die Musterabstandsgadgets - Eingabe der Mustergröße
+=========================
+
+Hier können Sie eingeben, wie das Punkte- oder Linienmuster auf der Funktion aussehen soll.
+Die eingegebene Zahl ist die Anzahl der berechneten Punkte, die beim Zeichnen des 
+Musters in der entspr. Achse übersprungen werden sollen.
+
+Bsp: Geben Sie 0;0 ein:              ++++++++++
+                                     ++++++++++
+                                     ++++++++++
+                                     ++++++++++
+                                     ++++++++++
+     
+     Geben Sie 2;2 ein:              +--+--+--+
+                                     |··|··|··|
+                                     |··|··|··|
+                                     +--+--+--+
+                                     |··|··|··|
+
+                                     (...)
+.end
+
+.33.34.35. Lichtvektor ----------------------------------------------------
+\
+Die Lichtquellengadgets - Eingabe der Position der Lichtquelle
+=======================
+
+Hier stehen die Koordinaten der Lichtquelle (im Bezug auf (0|0|0)).
+
+Diese kommen nur zum Tragen, wenn die Option "Körper:beleuchtet" gewählt ist.
+.end
+
+.52. Auto-Bild-Sicherung Intervall ----------------------------------------
+\
+Die automatische Bildsicherung
+==============================
+
+Sie haben die Möglichkeit, Ihr Bild beim Zeichenvorgang in gewissen Zeitabständen automatisch speichern zu lassen.
+
+Hier geben Sie dieses Zeitintervall in Minuten ein.
+
+Es sind Werte von 1 bis 999999 erlaubt.
+.end
+
+.53. Requester-Schwellenzeit ---------------------------------------------
+\
+Schwellenzeit für Sicherheitsabfragen
+=====================================
+
+Hier geben Sie die Zeichenzeit in Minuten ein, ab der das Programm Sicherhaitsabfragen machen soll, 
+falls durch irgendeine Handlung die Gefahr besteht, daß das gezeichnete Bild verloren geht.
+
+Es sind Werte von 0 bis 999999 erlaubt.
+.end
+
+.62. Backupfilename -----------------------------------------------------
+\
+Dateiname für Backups
+=====================
+
+Hier legen Sie die Datei fest, in die Sicherungskopien abgelegt werden.
+Sicherungskopien werden von Dateien angelegt, die von 3dPlot überschrieben werden müssen, 
+wenn die Option "Backupdatei" aktiviert ist.
+.end
+
+.64. Bildbreite ---------------------------------------------------------
+\
+Breite des Bildschirms
+======================
+
+Hier geben Sie bitte die Breite des sichtbaren Bilds (ohne Rahmen) in cm auf Ihrem Monitor ein.
+Es ist wichtig, daß der richtige Wert eingetragen ist, sonst kann 3dPlot kein Höhen-Breiten-Verhältnis berechnen.
+.end
+
+.65. Bildhöhe -----------------------------------------------------------
+\
+Höhe des Bildschirms
+====================
+
+Hier geben Sie bitte die Höhe des sichtbaren Bilds (ohne Rahmen) in cm auf Ihrem Monitor ein.
+Es ist wichtig, daß der richtige Wert eingetragen ist, sonst kann 3dPlot kein Höhen-Breiten-Verhältnis berechnen.
+.end
+
+.66. Augenmaße ----------------------------------------------------------
+\
+Augenvermaßung
+==============
+
+Ein wichtiger Wert für eine gute 3d-Darstellung ist die Entfernung des Betrachters zum Bildschirm.
+Speziell für die Rot-Grün-3d-Darstellung muß 3dPlot jedoch auch den Augenabstand des Betrachters wissen.
+
+Geben Sie hier bitte die Abstände 'Augen<->Bildschirm' und 'linkes Auge<->rechtes Auge' in cm ein, und zwar im Format:
+
+<Abst.>;<Abst.>
+.end
+
+.67. Anzeigebreite ------------------------------------------------------
+\
+Zeichenbereich x
+================
+
+Hier geben Sie die gewünschte Bildbreite in Punkten an, wobei hier mit 'Bildbreite' die Breite des Zeichenbereichs (schwarz) gemeint ist, und NICHT die Bildschirmbreite.
+.end
+
+.68. Anzeigehöhe --------------------------------------------------------
+\
+Zeichenbereich x
+================
+
+Hier geben Sie die gewünschte Bildhöhe in Punkten an, wobei hier mit 'Bildhöhe' die Höhe des Zeichenbereichs (schwarz) gemeint ist, und NICHT die Bildschirmhöhe.
+.end
+

@@ -1,0 +1,340 @@
+;	opt l+
+; Plot V2.1 SSi -----------------------------------------------------------
+; Assemblerteil von IFF_IO.c ----------------------------------------------
+
+;	opt	o+
+
+;	incdir	"data:Ass/include/"
+	include	"graphics/gfx.i"
+
+;	output .o
+	
+;--------------------------------------------------------------------------
+;int WriteIFFBody(D0 struct IFFHandle *iff, A0 struct BitMap *bm)
+;--------------------------------------------------------------------------
+
+;Registerequivalenzen
+
+curx	EQUR	d2	;.w	;x - Zeiger in Byte
+Begin	EQUR	d3	;.w	;compress. Begin
+comp	EQUR	d4	;.w	;compression mode
+equal	EQUR	d5	;.b	;Equal-zeichen bei comp=0
+GBs	EQUR	d6	;.w	;Anzahl gleiche Zeichen bei comp=0
+BIB	EQUR	d7	;.l	;Anzahl der Bytes im Buffer
+Dat	EQUR	a2	;.l	;^ Anfang der Bitplanezeile
+IOBuf	EQUR	a3	;.l	;^ IO-Buffer
+DB 	EQUR	a4	;.l	;DATA-Base
+Map	EQUR	a5	;.l	;^ BitMap-Strukt
+
+;d0-d1 / a0-a1  / a6 sind unbelegt und für Zwischenspeicherungen reserviert
+
+;-------------------------------------------------------------------------
+
+;Database
+
+	OFFSET 0
+Plane	ds.w	1
+cury	ds.w	1
+End	ds.w	1
+File	ds.l	1
+Buffer	ds.b	2
+DATA_SIZEOF
+	ds.w	0
+
+;-------------------------------------------------------------------------
+
+	SECTION	IFFCompression,CODE
+
+	XDEF	_WriteIFFBody
+	XREF	_IFFParseBase
+	
+_WriteIFFBody:	;Labels A
+	movem.l	d2-d7/a2-a6,-(sp)
+	
+	lea.l	DATABase,DB
+	move.l	d0,File(DB)	;File retten
+	move.l	a0,Map		;BitMap retten
+	
+	bsr.w	_OpenBuffer
+
+	move.w	#0,cury(DB)
+As1
+	move.w	cury(DB),d0
+	cmp.w	bm_Rows(Map),d0
+	bge.w	Aendof1
+	
+	move.w	#0,Plane(DB)
+As2
+	move.w	Plane(DB),d0
+	move.b	bm_Depth(Map),d1
+	cmp.b	d0,d1
+	ble.w	Aendof2
+	
+	
+	lsl.w	#2,d0
+	move.l	bm_Planes(Map,d0.w),Dat	/* Planeadresse holen */
+	move.w	bm_BytesPerRow(Map),d0
+	mulu	cury(DB),d0
+	add.l	d0,Dat
+	
+	clr.w	Begin
+	move.b	(Dat),equal
+	moveq	#1,GBs
+	moveq	#1,comp
+	
+	moveq	#1,curx
+
+As3
+	cmp.w	bm_BytesPerRow(Map),curx
+	bge.w	Aendof3	
+	
+	tst.w	comp
+	bne.s	ACOMP_IS_1
+
+ACOMP_IS_0
+	cmp.b	0(Dat,curx.w),equal
+	bne.s	AW_1
+	
+	addq.w	#1,GBs
+	move.w	curx,d0
+	sub.w	Begin,d0
+	cmp.w	#127,d0
+	bgt.s	AW_1
+	bra.s	Anext3
+	
+AW_1
+	move.w	curx,End(DB)
+	subq.w	#1,End(DB)
+	;---------------
+	bsr.w	WriteEQUAL
+	;---------------
+	moveq	#1,comp
+	move.w	curx,Begin
+	move.b	0(Dat,curx.w),equal
+	moveq	#1,GBs
+	bra.s	Anext3
+	
+ACOMP_IS_1
+	cmp.b	0(Dat,curx.w),equal
+	bne.s	AC1NE
+	
+	addq.w	#1,GBs
+	cmp.w	#2,GBs
+	ble.s	Anext3
+	
+	clr.w	comp
+	move.w	curx,End(DB)
+	sub.w	GBs,End(DB)
+AW_2
+	;-----------------
+	bsr	WriteUNEQUAL
+	;-----------------
+	move.w	End(DB),Begin
+	addq.w	#1,Begin
+	bra.s	Anext3
+
+AC1NE
+	move.w	curx,d0
+	sub.w	Begin,d0
+	cmp.w	#127,d0
+	ble.s	Anot_gr_127
+	
+	move.w	curx,End(DB)
+	subq.w	#1,End(DB)
+	move.b	0(Dat,curx.w),equal
+	bra.s	AW_2
+
+Anot_gr_127
+	move.b	0(Dat,curx.w),equal
+	moveq	#1,GBs
+
+Anext3
+	addq.w	#1,curx
+	bra.w	As3
+
+Aendof3
+	move.w	curx,End(DB)
+	subq.w	#1,End(DB)
+	
+	cmp.w	End(DB),Begin
+	bgt.s	Anext2
+	
+	tst.w	comp
+	beq.s	Ano_comp
+	
+	bsr.s	WriteUNEQUAL
+	bra.s	Anext2
+	
+Ano_comp
+	bsr.s	WriteEQUAL
+
+Anext2
+	addq.w	#1,Plane(DB)
+	bra.w	As2
+	
+Aendof2
+Anext1
+	addq.w	#1,cury(DB)
+	bra.w	As1
+
+Aendof1
+	bsr.w	_CloseBuffer
+	bra.s	Aout_of_WriteIFFBody
+	
+ASI_ERR
+	bsr.w	_CloseBuffer
+	moveq.l	#-1,d0
+
+Aout_of_WriteIFFBody
+	movem.l	(sp)+,d2-d7/a2-a6
+	rts
+
+WriteEQUAL:
+	move.w	Begin,d0
+	sub.w	End(DB),d0
+	move.b	d0,Buffer(DB)
+	move.b	equal,1+Buffer(DB)
+	
+	lea.l	Buffer(DB),a0
+	moveq.l	#2,d0
+	bsr.s	_WriteBuffered
+	tst.l	d0
+	bne.s	BGoTo_SI_ERR
+	rts
+
+WriteUNEQUAL:	;Labels B
+	cmp.w	End(DB),Begin
+	bgt.s	Bendof
+	
+	move.w	End(DB),d0
+	sub.w	Begin,d0
+	move.b	d0,Buffer(DB)
+	
+	lea.l	Buffer(DB),a0
+	moveq.l	#1,d0
+	bsr.s	_WriteBuffered
+	tst.l	d0
+	bne.s	BGoTo_SI_ERR
+	
+	move.l	Dat,a0
+	clr.l	d0
+	move.w	Begin,d0	
+	adda.l	d0,a0
+	move.w	End(DB),d0
+	sub.w	Begin,d0
+	addq.w	#1,d0
+	bsr.s	_WriteBuffered
+	tst.l	d0
+	bne.s	BGoTo_SI_ERR
+
+Bendof
+	rts
+
+BGoTo_SI_ERR
+	adda.l	#4,sp
+	bra.w	ASI_ERR
+	
+;-------------------------------------------------------------------------
+
+BUFSIZE	EQU	2048
+
+_OpenBuffer:	;Labels C
+	move.l	4.w,a6
+	move.l	#BUFSIZE,d0
+	clr.l	d1
+	jsr	-198(a6)	;AllocMem
+	movea.l	d0,IOBuf
+	tst.l	d0
+	beq.s	Cerr
+	clr.l	BIB
+	clr.l	d0
+	rts
+Cerr
+	moveq.l	#-1,d0
+	rts
+
+;--------------------------------------------------------------------------
+
+_WriteBuffered:			;Übergabe: d0 - Anzahl Byte / a0 - Buffer ; Labels D
+	clr.l	d1			;d1 - Written
+Ds1
+	cmp.l	d0,d1
+	bge.w	Dendof1
+	
+	cmp.l	#BUFSIZE,BIB
+	beq.s	Dwrite_it
+Dcont_after_write_it
+	move.b	0(a0,d1.l),0(IOBuf,BIB.l)
+	addq.l	#1,BIB
+Dnext1
+	addq.l	#1,d1
+	bra.s	Ds1
+Dendof1
+	clr.l	d0
+	rts
+
+Dwrite_it
+	movem.l	d0-d3/a0,-(sp)
+	
+	move.l	File(DB),a0
+	move.l	IOBuf,a1
+	move.l	BIB,d0
+	move.l	_IFFParseBase,a6
+	jsr	-66(a6)	;WriteChunkBytes
+	
+	tst.l	d0
+	bmi.s	Derr
+	
+	movem.l	(sp)+,d0-d3/a0
+	clr.l	BIB
+	bra.s	Dcont_after_write_it
+
+Derr
+	movem.l	(sp)+,d0-d3/a0
+	moveq.l	#-1,d0
+	rts
+
+;-------------------------------------------------------------------------
+
+_CloseBuffer:	;Labels E
+	tst.l	BIB
+	bne.s	Ewrite_it
+
+Econt_after_write_it
+	move.l	IOBuf,a1
+	move.l	#BUFSIZE,d0
+	move.l	4.w,a6
+	jsr	-210(a6)	;FreeMem
+	suba.l	IOBuf,IOBuf
+	clr.l	d0
+	rts
+
+Ewrite_it
+	movem.l	d3,-(sp)
+	
+	move.l	File(DB),a0
+	move.l	IOBuf,a1
+	move.l	BIB,d0
+	move.l	_IFFParseBase,a6
+	jsr	-66(a6)	;WriteChunkBytes
+	
+	tst.l	d0
+	bmi.s	Eerr
+	
+	movem.l	(sp)+,d3
+	clr.l	BIB
+	bra.s	Econt_after_write_it
+
+Eerr
+	movem.l	(sp)+,d3
+	moveq.l	#-1,d0
+	rts
+	
+;Datenbereich
+
+	SECTION	IFFCompression,BSS
+	
+DATABase:
+	ds.b	DATA_SIZEOF
+
+	END
