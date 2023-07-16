@@ -1,3 +1,6 @@
 *.uaem
 *.o
-
+*.lnk
+*.lnk.info
+3dPlot
+3dPlot-Prefs.3dp
