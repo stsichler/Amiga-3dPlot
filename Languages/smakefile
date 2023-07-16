@@ -1,8 +1,26 @@
 # Programm zur Neuproduktion der Sprachfiles
 
-MakeLanguage: English.o Deutsch.o
+all: English.lng Deutsch.lng
+
+English.mkl: MakeLanguage.o English.o
+	@ echo "*E[1m*E[2mBaue $@ ...*E[0m"
+	@ sc:c/slink quiet from LIB:C.o+MakeLanguage.o+English.o to English.mkl \
+		LIB /Version.o LIB:user.lib LIB:sc.lib LIB:amiga.lib
+
+English.lng: English.mkl
+
+Deutsch.mkl: MakeLanguage.o Deutsch.o
+	@ echo "*E[1m*E[2mBaue $@ ...*E[0m"
+        @ sc:c/slink quiet from LIB:C.o+MakeLanguage.o+Deutsch.o to Deutsch.mkl \
+		LIB /Version.o LIB:user.lib LIB:sc.lib LIB:amiga.lib
+
+Deutsch.lng: Deutsch.mkl
 
 .c.o:
-	sc:c/sc $>
-	makelanguage
+	@ echo "*E[1m*E[2mCompiliere $@ ...*E[0m"
+	@ sc:c/sc noversion nolink $*
 
+.mkl.lng:
+	@ echo "*E[1m*E[2mGeneriere $@ ...*E[0m"
+        @ $>.mkl
+        
