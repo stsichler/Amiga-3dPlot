@@ -8,7 +8,7 @@ The view can be rotated and positions of light sources can be configured to your
 
 The binary also features localization. Currently available languages are English and German.
 
-For execution of the included original binary, a 68060 CPU is required, but 3dPlot can be recompiled (using SAS/C 6.58) for 68020/40. **An FPU ist required.** 
+For execution of the included original binary, a 68060 CPU is required, but 3dPlot can be recompiled (using SAS/C 6.58) for 68020/40. **An FPU ist required.** The project depends on my [UserLib](https://github.com/stsichler/Amiga-UserLib).
 
 3dPlot's custom function parser supports the following mathematical functions, all featuring full support of complex numbers:
 
