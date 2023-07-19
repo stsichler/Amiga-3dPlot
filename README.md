@@ -16,4 +16,4 @@ For execution of the included original binary, a 68060 CPU is required, but 3dPl
 
 See the list of all supported operators in [Help.txt](/Help.txt) or [Hilfe.txt](/Hilfe.txt).
 
-In addition, an `ìterate(<result>, <expression1>, <expression2>, ...)` function is supported for rendering of functions requiring iterative calculations, like the *Mandelbrot set*.
+In addition, an `iterate(<result>, <expression1>, <expression2>, ...)` function is supported for rendering of functions requiring iterative calculations, like the *Mandelbrot set*.
